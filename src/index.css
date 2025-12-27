@@ -431,3 +431,19 @@ body {
     }
   }
 }
+
+#showcase {
+  position: relative;
+}
+
+#showcase .mask {
+  pointer-events: none;
+}
+
+#showcase.is-active .mask {
+  opacity: 1;
+}
+
+#showcase:not(.is-active) .mask {
+  opacity: 0;
+}
