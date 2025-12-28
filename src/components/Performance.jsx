@@ -6,8 +6,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 const Performance = () => {
   const sectionRef = useRef();
-  const containerRef = useRef();
-  
   const images = [
     { id: "p1", src: "/performance1.png", title: "QATAR, 2024", text: "First podium finish" },
     { id: "p2", src: "/performance2.png", title: "MONACO, 2023", text: "Street mastery" },
@@ -18,242 +16,121 @@ const Performance = () => {
   ];
 
   useEffect(() => {
-    // Clear existing ScrollTriggers
-    ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    
     const ctx = gsap.context(() => {
-      // Set initial positions - show images initially
-      gsap.set('.performance-image', {
-        x: 800,
-        opacity: 0,
-        scale: 0.8,
-        rotation: 0
+      // Set initial positions - IMAGES VISIBLE FROM START
+      images.forEach((img, i) => {
+        const isTop = i % 2 === 0;
+        
+        gsap.set(`#${img.id}`, {
+          x: 1000, // Start from right
+          y: isTop ? -200 : 200,
+          scale: 0.6,
+          rotation: isTop ? 12 : -12,
+          opacity: 0 // Hidden initially, animate to visible
+        });
+        
+        gsap.set(`.text-${img.id}`, {
+          x: 250,
+          opacity: 0,
+          scale: 0.85
+        });
       });
 
-      gsap.set('.performance-text', {
-        x: 200,
-        opacity: 0,
-        scale: 0.9
-      });
-
-      // Create main timeline
+      // SINGLE PIN - Fixed height, no double space
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top center",
-          end: "+=150%",
+          start: "top top",
+          end: "+=150%", // Reduced space
           scrub: 1,
-          pin: containerRef.current,
-          anticipatePin: 1,
-          markers: false,
+          pin: true,
+          pinSpacing: true, // Single spacer only
+          anticipatePin: 1
         }
       });
 
-      // Wave sequence animation
+      // Wave animation - all images become visible
       images.forEach((img, i) => {
         const isTop = i % 2 === 0;
-        const waveDelay = i * 0.2;
-        const yoyoScale = 1 + (i % 3) * 0.1;
+        const delay = i * 0.25;
         
-        // Image animation
+        // Images fly in and become visible
         tl.to(`#${img.id}`, {
           x: 0,
           y: 0,
-          scale: yoyoScale,
+          scale: 1,
           rotation: 0,
           opacity: 1,
           duration: 1.2,
-          ease: "power3.out"
-        }, waveDelay);
+          ease: "back.out(1.7)"
+        }, delay);
         
-        // Yo-yo effect
-        tl.to(`#${img.id}`, {
-          scale: 1,
-          y: isTop ? -15 : 15,
-          duration: 0.4,
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: 1
-        }, waveDelay + 0.4);
-        
-        // Text animation
+        // Text follows
         tl.to(`.text-${img.id}`, {
           x: 0,
           opacity: 1,
           scale: 1,
-          duration: 0.6,
-          ease: "power2.out"
-        }, waveDelay + 0.3);
-      });
-
-      // Remove continuous wave motion to prevent conflicts
-      // Add smooth scrolling wave effect
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 0.5,
-        onUpdate: (self) => {
-          const progress = self.progress;
-          
-          images.forEach((img, i) => {
-            const isTop = i % 2 === 0;
-            const waveHeight = Math.sin(progress * Math.PI * 2 + i * 0.5) * 20;
-            
-            gsap.to(`#${img.id}`, {
-              y: waveHeight * (isTop ? -1 : 1),
-              duration: 0.1,
-              overwrite: "auto"
-            });
-          });
-        }
+          duration: 0.8,
+          ease: "elastic.out(1, 0.3)"
+        }, delay + 0.3);
       });
 
     }, sectionRef);
 
-    return () => {
-      ctx.revert();
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
+    return () => ctx.revert();
   }, []);
 
   return (
     <section 
       ref={sectionRef}
+      className="performance" // Use your Tailwind classes
       style={{
-        width: '100vw',
-        height: '150vh', // Reduced height for single container
-        backgroundColor: '#000000', // Black background
+        backgroundColor: '#000000', // BLACK BG
         position: 'relative',
         overflow: 'hidden'
       }}
     >
-      {/* Single container with sticky positioning */}
-      <div 
-        ref={containerRef}
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        <h2 style={{
-          position: 'absolute',
-          top: '3rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          color: 'white',
-          fontSize: '4rem',
-          fontWeight: 900,
-          zIndex: 100,
-          textTransform: 'uppercase',
-          letterSpacing: '0.3em',
-          textShadow: '0 10px 30px rgba(0,0,0,0.8)',
-          background: 'linear-gradient(45deg, #ffffff, #cccccc)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
-        }}>
+      
+      {/* Single sticky container - NO DOUBLE */}
+      <div className="sticky top-0 w-full h-screen flex items-center justify-center relative">
+        <h2 className="absolute top-24 left-1/2 -translate-x-1/2 text-white text-5xl font-semibold z-20">
           PERFORMANCE
         </h2>
 
-        {/* Image container */}
-        <div style={{
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
+        <div className="spread w-full h-full relative flex items-center justify-center">
           {images.map((img, i) => {
             const isTop = i % 2 === 0;
             const widths = [16, 14, 18, 15, 20, 14];
-            const leftPositions = [5, 22, 39, 56, 73, 90];
             
             return (
               <div 
                 key={img.id}
+                className={`spread-item ${isTop ? "top" : "bottom"}`}
                 style={{
-                  position: 'absolute',
-                  left: `${leftPositions[i]}%`,
-                  top: isTop ? '15%' : 'auto',
-                  bottom: isTop ? 'auto' : '15%',
+                  left: `${8 + i * 14}%`,
                   width: `${widths[i]}rem`,
-                  zIndex: 10 - i
+                  zIndex: 20 - i,
+                  filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.6))'
                 }}
               >
                 <img 
                   id={img.id}
                   src={img.src}
                   alt=""
-                  className="performance-image"
-                  style={{
-                    width: '100%',
-                    height: isTop ? '24rem' : '20rem',
-                    objectFit: 'cover',
-                    borderRadius: '0.75rem',
-                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
-                    filter: 'brightness(0.95) saturate(1.1)',
-                    transition: 'all 0.3s ease',
-                    border: '2px solid rgba(255,255,255,0.15)',
-                    display: 'block' // Ensure image is shown
-                  }}
-                  onMouseEnter={(e) => {
-                    gsap.to(e.currentTarget, {
-                      scale: 1.05,
-                      filter: 'brightness(1.2) saturate(1.3)',
-                      borderColor: 'rgba(255,255,255,0.3)',
-                      duration: 0.3
-                    });
-                  }}
-                  onMouseLeave={(e) => {
-                    gsap.to(e.currentTarget, {
-                      scale: 1,
-                      filter: 'brightness(0.95) saturate(1.1)',
-                      borderColor: 'rgba(255,255,255,0.15)',
-                      duration: 0.3
-                    });
-                  }}
+                  className="w-full h-[22rem] md:h-[24rem] object-cover rounded-xl border-2 border-white/20 hover:border-white/40 transition-all duration-300"
                 />
                 <div 
-                  className={`performance-text text-${img.id}`}
+                  className={`spread-text text-${img.id}`}
                   style={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    [isTop ? 'bottom' : 'top']: '-5rem',
-                    color: 'white',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.15em',
-                    fontSize: '0.8rem',
-                    width: '100%',
-                    textAlign: 'left',
-                    backdropFilter: 'blur(8px)',
-                    backgroundColor: 'rgba(0,0,0,0.4)',
-                    padding: '0.75rem',
-                    borderRadius: '0.5rem',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    display: 'block' // Ensure text is shown
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    backdropFilter: 'blur(15px)',
+                    border: '1px solid rgba(255,255,255,0.1)'
                   }}
                 >
-                  <div style={{ 
-                    fontWeight: 800, 
-                    marginBottom: '0.25rem',
-                    fontSize: '1rem',
-                    color: '#ff6b6b'
-                  }}>
+                  <div className="font-bold text-lg text-red-400 mb-1">
                     {img.title}
                   </div>
-                  <div style={{ 
-                    fontStyle: 'italic',
-                    opacity: 0.95,
-                    fontSize: '0.85rem',
-                    letterSpacing: '0.05em'
-                  }}>
+                  <div className="text-sm opacity-90 italic">
                     {img.text}
                   </div>
                 </div>
