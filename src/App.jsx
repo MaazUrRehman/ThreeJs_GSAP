@@ -1,5 +1,6 @@
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
+import HeroSection from "./components/Hero/HeroSection";
 import ProductView from "./components/ProductView";
 import Showcase from "./components/ShowCase";
 import Performance from "./components/Performance";
@@ -15,6 +16,9 @@ const App = () => {
   return (
         <main>
             <Navbar />
+
+            <HeroSection />
+            
             <Hero />
             <ProductView />
             <Showcase />
